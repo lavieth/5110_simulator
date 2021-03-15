@@ -1,7 +1,7 @@
 // Iterative_Method_Simulator.cpp : This file contains the 'main' function. Program execution begins and ends there.
 
 ///////////////////////////////////////////////////////////////////////////////////////
-// Desc: Iterative Method Simulator                                                  //
+// Desc: Iterative Method Multiplication Simulator                                   //
 // Class: CpE 5110                                                                   //
 // Instructor: Dr. Ali Hurson                                                        //
 // Date: 3/15/2021                   SP21                                            //
@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <chrono>
 #include <thread>
+
 #include "driver.h"
 
 using namespace std; 
@@ -36,8 +37,13 @@ int main()
     int operand1_count = 0;
     int operand2_count = 0;
 
+    cout << "--- Iterative Method Multiplication Simulator ---";
+
+    // Read in operands from files
+    cout << "\n\nReading operands from files (binary).....\n\n";
+
     #pragma region File input operand1
-    // Read in binary operand 1 from file
+    // Read in binary operand1 from file
     ifstream op1_input_file("operand1.txt");
     if (op1_input_file.is_open())
     {
@@ -57,11 +63,11 @@ int main()
     #pragma endregion
 
     #pragma region File input operand2
-    // Read in binary operand 2 from file
+    // Read in binary operand2 from file
     ifstream op2_input_file("operand2.txt");
     if (op2_input_file.is_open())
     {
-        cout << "\n\n";
+        cout << "\n\n"; // spacing 
 
         while (getline(op2_input_file, operand1))
         {
@@ -77,4 +83,12 @@ int main()
         return 0;
     }
     #pragma endregion
+
+    simulate_IM(operand1_count, operand1s, operand2s); // Begin simulation
+}
+
+
+void simulate_IM(int op_count, vector<bitset<16>> op1, vector<bitset<16>> op2)
+{
+    cout << "yeet";
 }
