@@ -26,6 +26,7 @@ using namespace std::this_thread;     // sleep_for, sleep_until
 using namespace std::chrono_literals; // ns, us, ms, s, h, etc.
 using std::chrono::system_clock;
 
+// Get inputs, hand information to simulator
 int main()
 {
     // Declare variables
@@ -84,11 +85,15 @@ int main()
     }
     #pragma endregion
 
-    simulate_IM(operand1_count, operand1s, operand2s); // Begin simulation
+    // Iterate through all problems
+    for (int i = 0; i < operand1_count; i++)
+    {
+        simulate_IM(operand1s[i], operand2s[i]); // Begin simulation
+    }
 }
 
-
-void simulate_IM(int op_count, vector<bitset<16>> op1, vector<bitset<16>> op2)
+// Main function for simulating iterative method
+void simulate_IM(bitset<16> op1, bitset<16> op2)
 {
-    cout << "yeet";
+    //cout << "\n" << op1.to_ulong() << " x " << op2.to_ulong() << " = " << (op1.to_ullong() * op2.to_ulong()); // Answers
 }
