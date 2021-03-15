@@ -25,11 +25,56 @@ using namespace std::this_thread;     // sleep_for, sleep_until
 using namespace std::chrono_literals; // ns, us, ms, s, h, etc.
 using std::chrono::system_clock;
 
-int main(){
+int main()
+{
+    // Declare variables
+    vector<bitset<16>> operand1s;
+    vector<bitset<16>> operand2s;
+    string operand1;
+    string operand2;
 
-	//test 1
-	cout << "Hello world";
+    int operand1_count = 0;
+    int operand2_count = 0;
 
+    #pragma region File input operand1
+    // Read in binary operand 1 from file
+    ifstream op1_input_file("operand1.txt");
+    if (op1_input_file.is_open())
+    {
+        while (getline(op1_input_file, operand1))
+        {
+            operand1s.push_back(bitset<16>(operand1));
+            cout << "Operand1[" << operand1_count << "]: " << (operand1s[operand1_count]).to_ulong() << '\n';
+            operand1_count++;
+        }
+        op1_input_file.close();
+    }
+    else
+    {
+        cout << "\nUnable to open operands1 file";
+        return 0;
+    }
+    #pragma endregion
 
-// Hello 2
+    #pragma region File input operand2
+    // Read in binary operand 2 from file
+    ifstream op2_input_file("operand2.txt");
+    if (op2_input_file.is_open())
+    {
+        cout << "\n\n";
+
+        while (getline(op2_input_file, operand1))
+        {
+            operand2s.push_back(bitset<16>(operand1));
+            cout << "Operand2[" << operand2_count << "]: " << (operand2s[operand2_count]).to_ulong() << '\n';
+            operand2_count++;
+        }
+        op2_input_file.close();
+    }
+    else
+    {
+        cout << "\nUnable to open operands2 file";
+        return 0;
+    }
+    #pragma endregion
 }

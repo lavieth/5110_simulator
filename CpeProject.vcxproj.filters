@@ -24,4 +24,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="operand1.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="operand2.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>
