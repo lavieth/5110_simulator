@@ -95,5 +95,13 @@ int main()
 // Main function for simulating iterative method
 void simulate_IM(bitset<16> op1, bitset<16> op2)
 {
-    //cout << "\n" << op1.to_ulong() << " x " << op2.to_ulong() << " = " << (op1.to_ullong() * op2.to_ulong()); // Answers
+    //cout << "\n" << dec << op1.to_ulong() << " x " << op2.to_ulong() << " = " << hex << (op1.to_ullong() * op2.to_ulong()); // Answers in Hexadecimal
+
+    // Notes:
+    // Four 4x4 Multiplier units available to run simultaneously, each has a delay of 21dt
+    // Results should be in Binary and Hexadecimal
+    // Execution time must be calculated in terms of dt. AND/OR gate has delay of 1dt
+
+    // Step 1: split each operand into 2x8 bit sets;
+
 }
