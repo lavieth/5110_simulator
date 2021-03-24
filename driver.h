@@ -8,3 +8,5 @@ using namespace std;
 
 // General functions
 void simulate_IM(bitset<16> op1, bitset<16> op2); // Simulate Iterative Method (IM)
+int getLength(bitset<16> op); // Get length of operand
+int getRoundedLength(int lenOp1, int lenOp2); // Get rounded lengths of operator either 8 or 16

@@ -96,6 +96,23 @@ int main()
 void simulate_IM(bitset<16> op1, bitset<16> op2)
 {
     //cout << "\n" << dec << op1.to_ulong() << " x " << op2.to_ulong() << " = " << hex << (op1.to_ullong() * op2.to_ulong()); // Answers in Hexadecimal
+    
+    
+    // Operations should be rounded to 1 of 2 categories --> 8x8, or 16x16 depending on which ever operand is larger
+    // at minimum must use 4x4 multiplier --> so round to either 8x8 or 16x16
+    // This is used later for calculating correct timing but all operations will be 16x16
+
+    int roundedLen = getRoundedLength(getLength(op1), getLength(op2));
+    //cout << "\nRounded length: " << roundedLen;
+
+
+
+
+
+
+
+
+
 
     // Notes:
     // Four 4x4 Multiplier units available to run simultaneously, each has a delay of 21dt
@@ -103,5 +120,45 @@ void simulate_IM(bitset<16> op1, bitset<16> op2)
     // Execution time must be calculated in terms of dt. AND/OR gate has delay of 1dt
 
     // Step 1: split each operand into 2x8 bit sets;
+}
 
+// Return length of operand
+int getLength(bitset<16> op)
+{
+    int len = 0;
+
+    for (int i = 15; i > 0; i--)  // Find first 1 bit from high-order bits to get true length (disregard leading 0's)
+    {
+        if (op[i] == 1)
+        {
+            len = i + 1;
+            i = 0; // Terminate
+        }
+    }
+    return len;
+}
+
+// Return length rounded to nearest 8 or 16 bit
+int getRoundedLength(int lenOp1, int lenOp2)
+{
+    int roundedLen = 0;
+
+    //Determine 8 or 16 bit
+    if (lenOp1 > lenOp2)
+    {
+        if (lenOp1 <= 8) { roundedLen = 8; } // Round to 8 bits
+        else { roundedLen = 16; } // Round to 16 bits (keep original)
+    }
+    else if (lenOp2 > lenOp1)
+    {
+        if (lenOp2 <= 8) { roundedLen = 8; } // Round to 8 bits
+        else { roundedLen = 16; } // Round to 16 bits (keep original)
+    }
+    else // Equal length, use Op1
+    {
+        if (lenOp1 <= 8) { roundedLen = 8; } // Round to 8 bits
+        else { roundedLen = 16; } // Round to 16 bits (keep original)
+    }
+
+    return roundedLen;
 }
