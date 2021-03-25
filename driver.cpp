@@ -95,7 +95,7 @@ int main()
 // Main function for simulating iterative method
 void simulate_IM(bitset<16> op1, bitset<16> op2)
 {
-    //cout << "\n" << dec << op1.to_ulong() << " x " << op2.to_ulong() << " = " << hex << (op1.to_ullong() * op2.to_ulong()); // Answers in Hexadecimal
+    cout << "\n" << dec << op1.to_ulong() << " x " << op2.to_ulong() << " = " << hex << (op1.to_ullong() * op2.to_ulong()); // Answers in Hexadecimal
     
     
     // Operations should be rounded to 1 of 2 categories --> 8x8, or 16x16 depending on which ever operand is larger
@@ -113,23 +113,32 @@ void simulate_IM(bitset<16> op1, bitset<16> op2)
     bitset<8> b = getRight8bits(op1);
     bitset<8> c = getLeft8bits(op2);
     bitset<8> d = getRight8bits(op2);
-    //cout << "\nb = " << b << "  c = " << c;
 
+    // Calculate "bc", "ac", "bd", "ad" terms using 8x8 iterative method --> 4x4 multipliers
     bitset<16> bc = simulateIM_8x8(b, c);
-    bitset<16> ac;
-    bitset<16> bd;
-    bitset<16> ad;
+    bitset<16> ac = simulateIM_8x8(a, c);
+    bitset<16> bd = simulateIM_8x8(b, d);
+    bitset<16> ad = simulateIM_8x8(a, d);
 
+    // Concatinate "ac" and "bd"
+    bitset<32> acbd = concat32_ac_bd(ac, bd);
 
+    // Add "bc" and "ad" terms
+    bitset<16> sum_bc_ad = bc.to_ulong() + ad.to_ulong();
 
+    // Pad sum_bc_ad with 0's so it's in the middle
+    bitset<32> pad_bc_ad = pad_32bit(sum_bc_ad);
+
+    // Final addition for answer
+    bitset<32> answer = acbd.to_ulong() + pad_bc_ad.to_ulong();
+
+    cout << "\n16x16 Answer: " << hex << answer.to_ulong() << "\n\n";
 
 
     // Notes:
     // Four 4x4 Multiplier units available to run simultaneously, each has a delay of 21dt
     // Results should be in Binary and Hexadecimal
     // Execution time must be calculated in terms of dt. AND/OR gate has delay of 1dt
-
-    // Step 1: split each operand into 2x8 bit sets;
 }
 
 // Simulate 8x8 iterative method used with 16x16 version
@@ -141,14 +150,14 @@ bitset<16> simulateIM_8x8(bitset<8> op1, bitset<8> op2)
     bitset<4> c = getLeft4bits(op2);
     bitset<4> d = getRight4bits(op2);
 
-    // Calculate "bc", "ac", "bd", "ad" terms
+    // Calculate "bc", "ac", "bd", "ad" terms using 4x4 multipliers
     bitset<8> bc = multiplier4x4(b, c);
     bitset<8> ac = multiplier4x4(a, c);
     bitset<8> bd = multiplier4x4(b, d);
     bitset<8> ad = multiplier4x4(a, d);
     
     // Concatinate "ac" and "bd"
-    bitset<16> acbd = concat_ac_bd(ac, bd);
+    bitset<16> acbd = concat16_ac_bd(ac, bd);
 
     // Add "bc" and "ad" terms
     bitset<8> sum_bc_ad = bc.to_ulong() + ad.to_ulong();
@@ -159,22 +168,22 @@ bitset<16> simulateIM_8x8(bitset<8> op1, bitset<8> op2)
     // Final addition for answer
     bitset<16> answer = acbd.to_ulong() + pad_bc_ad.to_ulong();
 
-
-    // Debugging
-    cout << "\n\nop1: " << op1;
-    cout << "\nop2: " << op2;
-    cout << "\na: " << a;
-    cout << "\nb: " << b;
-    cout << "\nc: " << c;
-    cout << "\nd: " << d;
-    cout << "\nbc: " << bc;
-    cout << "\nac: " << ac;
-    cout << "\nbd: " << bd;
-    cout << "\nad: " << ad;
-    cout << "\nconcatinate ac bd: " << acbd;
-    cout << "\nsum bc_ad: " << sum_bc_ad;
-    cout << "\npadded bc_ad: " << pad_bc_ad;
-    cout << "\nAnswer: " << answer << "\n\n";
+    #pragma region Debugging
+    //cout << "\n\nop1: " << op1;
+    //cout << "\nop2: " << op2;
+    //cout << "\na: " << a;
+    //cout << "\nb: " << b;
+    //cout << "\nc: " << c;
+    //cout << "\nd: " << d;
+    //cout << "\nbc: " << bc;
+    //cout << "\nac: " << ac;
+    //cout << "\nbd: " << bd;
+    //cout << "\nad: " << ad;
+    //cout << "\nconcatinate ac bd: " << acbd;
+    //cout << "\nsum bc_ad: " << sum_bc_ad;
+    //cout << "\npadded bc_ad: " << pad_bc_ad;
+    //cout << "\nAnswer: " << answer << "\n\n";
+    #pragma endregion
 
     return answer;
 }
@@ -219,6 +228,7 @@ int getRoundedLength(int lenOp1, int lenOp2)
 
     return roundedLen;
 }
+
 
 // Get the high order 8 bits from a 16 bit operand
 bitset<8> getLeft8bits(bitset<16> op)
@@ -268,6 +278,7 @@ bitset<4> getRight4bits(bitset<8> op)
     return temp;
 }
 
+
 // Simulate 4x4 mulitplier
 bitset<8> multiplier4x4(bitset<4> op1, bitset<4> op2)
 {
@@ -278,8 +289,9 @@ bitset<8> multiplier4x4(bitset<4> op1, bitset<4> op2)
     return ans;
 }
 
-// Concatinate "ac" and "bc" terms for 8x8 IM
-bitset<16> concat_ac_bd(bitset<8> ac, bitset<8> bd)
+
+// Concatinate "ac" and "bd" terms for 8x8 IM
+bitset<16> concat16_ac_bd(bitset<8> ac, bitset<8> bd)
 {
     bitset<16> ans;
 
@@ -296,6 +308,25 @@ bitset<16> concat_ac_bd(bitset<8> ac, bitset<8> bd)
     return ans;
 }
 
+// Concatinate "ac" and "bd" terms for 16x16 IM
+bitset<32> concat32_ac_bd(bitset<16> ac, bitset<16> bd)
+{
+    bitset<32> ans;
+
+    for (int i = 31; i > 15; i--)
+    {
+        ans[31 - (31 - i)] = ac[15 - (31 - i)]; // concatinate "ac" to left side
+    }
+
+    for (int j = 15; j >= 0; j--)
+    {
+        ans[j] = bd[j]; // concatinate "bd" to right side
+    }
+
+    return ans;
+}
+
+
 // Shift left bc_ad to center it before final addition for 8x8 IM
 bitset<16> pad_16bit(bitset<8> bc_ad)
 {
@@ -304,6 +335,18 @@ bitset<16> pad_16bit(bitset<8> bc_ad)
     for (int i = 7; i >= 0; i--)
     {
         ans[i + 4] = bc_ad[i]; // get into the form 0000 bc_ad 0000
+    }
+    return ans;
+}
+
+// Shift left bc_ad to center it before final addition for 16x16 IM
+bitset<32> pad_32bit(bitset<16> bc_ad)
+{
+    bitset<32> ans;
+
+    for (int i = 15; i >= 0; i--)
+    {
+        ans[i + 8] = bc_ad[i]; // get into the form 0000 bc_ad 0000
     }
     return ans;
 }

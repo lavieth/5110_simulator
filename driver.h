@@ -19,6 +19,9 @@ bitset<4> getLeft4bits(bitset<8> op); // Get the high order 4 bits from an 8 bit
 bitset<4> getRight4bits(bitset<8> op); // Get the low order 4 bits from an 8 bit operand
 
 bitset<8> multiplier4x4(bitset<4> op1, bitset<4> op2); // Simulate 4x4 mulitplier
-// Concatinate "ac" and "bc" terms
-bitset<16> concat_ac_bd(bitset<8> ac, bitset<8> bd); // Concatinate "ac" and "bd" terms for 8x8 IM
+
+bitset<16> concat16_ac_bd(bitset<8> ac, bitset<8> bd); // Concatinate "ac" and "bd" terms for 8x8 IM
+bitset<32> concat32_ac_bd(bitset<16> ac, bitset<16> bd); // Concatinate "ac" and "bd" terms for 16x16 IM
+
 bitset<16> pad_16bit(bitset<8> bc_ad); // Shift left bc_ad to center it before final addition for 8x8 IM
+bitset<32> pad_32bit(bitset<16> bc_ad); // Shift left bc_ad to center it before final addition for 16x16 IM
