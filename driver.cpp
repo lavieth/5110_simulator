@@ -51,7 +51,7 @@ int main()
         while (getline(op1_input_file, operand1))
         {
             operand1s.push_back(bitset<16>(operand1));
-            cout << "Operand1[" << operand1_count << "]: " << (operand1s[operand1_count]).to_ulong() << '\n';
+            //cout << "Operand1[" << operand1_count << "]: " << (operand1s[operand1_count]).to_ulong() << '\n';
             operand1_count++;
         }
         op1_input_file.close();
@@ -73,7 +73,7 @@ int main()
         while (getline(op2_input_file, operand1))
         {
             operand2s.push_back(bitset<16>(operand1));
-            cout << "Operand2[" << operand2_count << "]: " << (operand2s[operand2_count]).to_ulong() << '\n';
+            //cout << "Operand2[" << operand2_count << "]: " << (operand2s[operand2_count]).to_ulong() << '\n';
             operand2_count++;
         }
         op2_input_file.close();
@@ -106,9 +106,19 @@ void simulate_IM(bitset<16> op1, bitset<16> op2)
     //cout << "\nRounded length: " << roundedLen;
 
 
+    // Step 1.) Determine bc , ac , bd, ad (8x8 multiplication --> sub-iterative methods)
 
+    // get "a" , "b", "c", "d" terms from operand1 and operand2
+    bitset<8> a = getLeft8bits(op1);
+    bitset<8> b = getRight8bits(op1);
+    bitset<8> c = getLeft8bits(op2);
+    bitset<8> d = getRight8bits(op2);
+    //cout << "\nb = " << b << "  c = " << c;
 
-
+    bitset<16> bc = simulateIM_8x8(b, c);
+    bitset<16> ac;
+    bitset<16> bd;
+    bitset<16> ad;
 
 
 
@@ -120,6 +130,53 @@ void simulate_IM(bitset<16> op1, bitset<16> op2)
     // Execution time must be calculated in terms of dt. AND/OR gate has delay of 1dt
 
     // Step 1: split each operand into 2x8 bit sets;
+}
+
+// Simulate 8x8 iterative method used with 16x16 version
+bitset<16> simulateIM_8x8(bitset<8> op1, bitset<8> op2)
+{
+    // To calculate "bc", "ac", "bd", "ad" need to seperate "a", "b", "c", "d" terms
+    bitset<4> a = getLeft4bits(op1);
+    bitset<4> b = getRight4bits(op1);
+    bitset<4> c = getLeft4bits(op2);
+    bitset<4> d = getRight4bits(op2);
+
+    // Calculate "bc", "ac", "bd", "ad" terms
+    bitset<8> bc = multiplier4x4(b, c);
+    bitset<8> ac = multiplier4x4(a, c);
+    bitset<8> bd = multiplier4x4(b, d);
+    bitset<8> ad = multiplier4x4(a, d);
+    
+    // Concatinate "ac" and "bd"
+    bitset<16> acbd = concat_ac_bd(ac, bd);
+
+    // Add "bc" and "ad" terms
+    bitset<8> sum_bc_ad = bc.to_ulong() + ad.to_ulong();
+
+    // Pad sum_bc_ad with 0's so it's in the middle
+    bitset<16> pad_bc_ad = pad_16bit(sum_bc_ad);
+
+    // Final addition for answer
+    bitset<16> answer = acbd.to_ulong() + pad_bc_ad.to_ulong();
+
+
+    // Debugging
+    cout << "\n\nop1: " << op1;
+    cout << "\nop2: " << op2;
+    cout << "\na: " << a;
+    cout << "\nb: " << b;
+    cout << "\nc: " << c;
+    cout << "\nd: " << d;
+    cout << "\nbc: " << bc;
+    cout << "\nac: " << ac;
+    cout << "\nbd: " << bd;
+    cout << "\nad: " << ad;
+    cout << "\nconcatinate ac bd: " << acbd;
+    cout << "\nsum bc_ad: " << sum_bc_ad;
+    cout << "\npadded bc_ad: " << pad_bc_ad;
+    cout << "\nAnswer: " << answer << "\n\n";
+
+    return answer;
 }
 
 // Return length of operand
@@ -161,4 +218,92 @@ int getRoundedLength(int lenOp1, int lenOp2)
     }
 
     return roundedLen;
+}
+
+// Get the high order 8 bits from a 16 bit operand
+bitset<8> getLeft8bits(bitset<16> op)
+{
+    bitset<8> temp;
+
+    for (int i = 15; i > 7; i--)
+    {
+        temp[7 - (15 - i)] = op[i]; // extract "a" or "c"
+    }
+    return temp;
+}
+
+// Get the low order 8 bits from a 16 bit operand
+bitset<8> getRight8bits(bitset<16> op)
+{
+    bitset<8> temp;
+
+    for (int j = 7; j >= 0; j--)
+    {
+        temp[j] = op[j]; // extract "b" or "d"
+    }
+    return temp;
+}
+
+// Get the high order 4 bits from an 8 bit operand
+bitset<4> getLeft4bits(bitset<8> op)
+{
+    bitset<4> temp;
+
+    for (int i = 7; i > 3; i--)
+    {
+        temp[3 - (7 - i)] = op[i]; // extract sub "a" or "c"
+    }
+    return temp;
+}
+
+// Get the low order 4 bits from an 8 bit operand
+bitset<4> getRight4bits(bitset<8> op)
+{
+    bitset<4> temp;
+
+    for (int j = 3; j >= 0; j--)
+    {
+        temp[j] = op[j]; // extract sub "b" or "d"
+    }
+    return temp;
+}
+
+// Simulate 4x4 mulitplier
+bitset<8> multiplier4x4(bitset<4> op1, bitset<4> op2)
+{
+    bitset<8> ans = op1.to_ulong() * op2.to_ulong();
+
+    // Insert timing here? 21dt
+
+    return ans;
+}
+
+// Concatinate "ac" and "bc" terms for 8x8 IM
+bitset<16> concat_ac_bd(bitset<8> ac, bitset<8> bd)
+{
+    bitset<16> ans;
+
+    for (int i = 15; i > 7; i--)
+    {
+        ans[15 - (15 - i)] = ac[7-(15-i)]; // concatinate "ac" to left side
+    }
+
+    for (int j = 7; j >= 0; j--)
+    {
+        ans[j] = bd[j]; // concatinate "bd" to right side
+    }
+
+    return ans;
+}
+
+// Shift left bc_ad to center it before final addition for 8x8 IM
+bitset<16> pad_16bit(bitset<8> bc_ad)
+{
+    bitset<16> ans;
+
+    for (int i = 7; i >= 0; i--)
+    {
+        ans[i + 4] = bc_ad[i]; // get into the form 0000 bc_ad 0000
+    }
+    return ans;
 }
