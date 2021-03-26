@@ -97,6 +97,7 @@ void simulate_IM(bitset<16> op1, bitset<16> op2)
 {
     cout << "\n" << dec << op1.to_ulong() << " x " << op2.to_ulong() << " = " << hex << (op1.to_ullong() * op2.to_ulong()); // Answers in Hexadecimal
     
+    string timing_display = get_timing(op1, op2);
     
     // Operations should be rounded to 1 of 2 categories --> 8x8, or 16x16 depending on which ever operand is larger
     // at minimum must use 4x4 multiplier --> so round to either 8x8 or 16x16
@@ -132,7 +133,7 @@ void simulate_IM(bitset<16> op1, bitset<16> op2)
     // Final addition for answer
     bitset<32> answer = acbd.to_ulong() + pad_bc_ad.to_ulong();
 
-    cout << "\n16x16 Answer: " << hex << answer.to_ulong() << "\n\n";
+    cout << "\n16x16 Answer: " << hex << answer.to_ulong() << timing_display <<"\n\n";
 
 
     // Notes:
@@ -207,6 +208,11 @@ int getLength(bitset<16> op)
 // Return length rounded to nearest 8 or 16 bit
 int getRoundedLength(int lenOp1, int lenOp2)
 {
+    //do we need a case for 4 bits?
+    //this will always work for calculations but
+    //in the timing displays will never allow for the 
+    //4-bit case
+
     int roundedLen = 0;
 
     //Determine 8 or 16 bit
@@ -284,8 +290,6 @@ bitset<8> multiplier4x4(bitset<4> op1, bitset<4> op2)
 {
     bitset<8> ans = op1.to_ulong() * op2.to_ulong();
 
-    // Insert timing here? 21dt
-
     return ans;
 }
 
@@ -349,4 +353,36 @@ bitset<32> pad_32bit(bitset<16> bc_ad)
         ans[i + 8] = bc_ad[i]; // get into the form 0000 bc_ad 0000
     }
     return ans;
+}
+
+//displays required cost of 4x4 multipliers and the cost for the 
+//subsequent additions 
+string get_timing(bitset<16> op1, bitset<16> op2)
+{
+    string timing;
+
+    //get the rounded length of both operands
+    uint8_t op_len = getRoundedLength(getLength(op1), getLength(op2));
+
+    //four 4x4s in parallel, two additions - two 8bit -> 2*13dt
+    //(technically a 6bit and 8bit, but we can't break the 6bit up, so round up)
+    if (op_len == 4)
+    {
+        timing = " Timing: 21 dT (4x4 multipliers) + 26 dT (CLA v.2) = 47 dT";
+    }
+
+    //four 4x4 multipliers in parallel, two additions - one 12bit (17dt) one 16bit (21dt)
+    else if (op_len == 8)
+    {
+        timing = " Timing: 21 dT (4x4 multipliers) + 38 dT (CLA v.2) = 59 dT";
+    }
+
+    //***not finished, checking math*** 
+    else
+    {
+        timing = " Timing cost is 84 delta T with 10 additions.";
+    }
+
+
+    return timing;
 }
