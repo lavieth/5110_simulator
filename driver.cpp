@@ -90,6 +90,8 @@ int main()
     {
         simulate_IM(operand1s[i], operand2s[i]); // Begin simulation
     }
+
+    // Test
 }
 
 // Main function for simulating iterative method
