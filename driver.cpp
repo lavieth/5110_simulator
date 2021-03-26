@@ -366,11 +366,10 @@ string get_timing(bitset<16> op1, bitset<16> op2)
     //get the rounded length of both operands
     uint8_t op_len = getRoundedLength(getLength(op1), getLength(op2));
 
-    //four 4x4s in parallel, two additions - two 8bit -> 2*13dt
-    //(technically a 6bit and 8bit, but we can't break the 6bit up, so round up)
+    //four 4x4s in parallel, multiplier takes care of it for us, no additions needed
     if (op_len == 4)
     {
-        timing = " Timing: 21 dT (4x4 multipliers) + 26 dT (CLA v.2) = 47 dT";
+        timing = " Timing: 21 dT (4x4 multipliers) = 21dT";
     }
 
     //four 4x4 multipliers in parallel, two additions - one 12bit (17dt) one 16bit (21dt)
@@ -379,10 +378,12 @@ string get_timing(bitset<16> op1, bitset<16> op2)
         timing = " Timing: 21 dT (4x4 multipliers) + 38 dT (CLA v.2) = 59 dT";
     }
 
-    //***not finished, checking math*** 
+    //16 4x4s needed , can only run 4 at a time - 4*21dt,
+    //4 12bit additions, 4 16bit additions, 1 24bit addition, 1 16bit addition
+    // 4*21dt, 4*17dt, 4*21dt, 29dt, 37dt
     else
     {
-        timing = " Timing cost is 84 delta T with 10 additions.";
+        timing = " Timing: 84 dT (4x4 multipliers) + 218dT (CLA v.2) = 302 dT";
     }
 
 
