@@ -86,8 +86,8 @@ int main()
     #pragma endregion
 
     // Table formating
-    cout << "\n========================== Iterative Method (Hex) =========================";
-    cout << "\n| Op1 | Op2 | Answer | #Additions | #Multiplications | #Execution Time dt |";
+    cout << "\n============================ Iterative Method ===========================";
+    cout << "\n| Op1 (Hex) | Op2 (Hex)| Answer | #Execution Time dt |";
     cout << "\n---------------------------------------------------------------------------";
 
     // Iterate through all problems
