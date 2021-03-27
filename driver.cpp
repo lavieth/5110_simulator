@@ -41,7 +41,7 @@ int main()
     cout << "--- Iterative Method Multiplication Simulator ---";
 
     // Read in operands from files
-    cout << "\n\nReading operands from files (binary).....\n\n";
+    cout << "\n\nReading operands from files (binary).....";
 
     #pragma region File input operand1
     // Read in binary operand1 from file
@@ -85,20 +85,28 @@ int main()
     }
     #pragma endregion
 
+    // Table formating
+    cout << "\n========================== Iterative Method (Hex) =========================";
+    cout << "\n| Op1 | Op2 | Answer | #Additions | #Multiplications | #Execution Time dt |";
+    cout << "\n---------------------------------------------------------------------------";
+
     // Iterate through all problems
     for (int i = 0; i < operand1_count; i++)
     {
         simulate_IM(operand1s[i], operand2s[i]); // Begin simulation
     }
 
-    // Test
+    cout << "\n==================================================================+========\n";
 }
 
 // Main function for simulating iterative method
 void simulate_IM(bitset<16> op1, bitset<16> op2)
 {
-    cout << "\n" << dec << op1.to_ulong() << " x " << op2.to_ulong() << " = " << hex << (op1.to_ullong() * op2.to_ulong()); // Answers in Hexadecimal
+    //cout << "\n" << dec << op1.to_ulong() << " x " << op2.to_ulong() << " = " << hex << (op1.to_ullong() * op2.to_ulong()); // Answers in Hexadecimal (debug)
     
+    // Output operand1 and operand2 onto the output table
+    cout << "\n  " << uppercase << hex << op1.to_ulong() << "\t" << op2.to_ulong();
+
     string timing_display = get_timing(op1, op2);
     
     // Operations should be rounded to 1 of 2 categories --> 8x8, or 16x16 depending on which ever operand is larger
@@ -135,9 +143,13 @@ void simulate_IM(bitset<16> op1, bitset<16> op2)
     // Final addition for answer
     bitset<32> answer = acbd.to_ulong() + pad_bc_ad.to_ulong();
 
-    cout << "\n16x16 Answer: " << hex << answer.to_ulong() << timing_display <<"\n\n";
 
+    // Output answer to table in hex
+    cout << "\t" << hex << answer.to_ulong();
+    //cout << "\n16x16 Answer: " << hex << answer.to_ulong() << timing_display <<"\n\n";
+    // Need to display #additions and #multiplications --> iterative method --> 4 multiplications of n/2 bit numbers and 2 additions 9 (notes)
 
+    
     // Notes:
     // Four 4x4 Multiplier units available to run simultaneously, each has a delay of 21dt
     // Results should be in Binary and Hexadecimal
@@ -226,7 +238,7 @@ int getRoundedLength(int lenOp1, int lenOp2)
     }
     else if (lenOp2 > lenOp1)
     {
-        if (lenOp1 <= 4) { roundedLen = 4; } // round to 4 bits
+        if (lenOp2 <= 4) { roundedLen = 4; } // round to 4 bits
         else if (lenOp2 <= 8) { roundedLen = 8; } // Round to 8 bits
         else { roundedLen = 16; } // Round to 16 bits (keep original)
     }
@@ -288,7 +300,6 @@ bitset<4> getRight4bits(bitset<8> op)
     }
     return temp;
 }
-
 
 // Simulate 4x4 mulitplier
 bitset<8> multiplier4x4(bitset<4> op1, bitset<4> op2)
@@ -388,7 +399,6 @@ string get_timing(bitset<16> op1, bitset<16> op2)
     {
         timing = "\nTiming: 84 dT (4x4 multipliers) + 218dT (CLA v.2) = 302 dT";
     }
-
 
     return timing;
 }
