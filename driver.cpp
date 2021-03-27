@@ -217,20 +217,23 @@ int getRoundedLength(int lenOp1, int lenOp2)
 
     int roundedLen = 0;
 
-    //Determine 8 or 16 bit
+    //Determine if 4 or 8 or 16 bit
     if (lenOp1 > lenOp2)
     {
-        if (lenOp1 <= 8) { roundedLen = 8; } // Round to 8 bits
+        if (lenOp1 <= 4) { roundedLen = 4; } //round to 4 bits
+        else if (lenOp1 <= 8) { roundedLen = 8; } // Round to 8 bits
         else { roundedLen = 16; } // Round to 16 bits (keep original)
     }
     else if (lenOp2 > lenOp1)
     {
-        if (lenOp2 <= 8) { roundedLen = 8; } // Round to 8 bits
+        if (lenOp1 <= 4) { roundedLen = 4; } // round to 4 bits
+        else if (lenOp2 <= 8) { roundedLen = 8; } // Round to 8 bits
         else { roundedLen = 16; } // Round to 16 bits (keep original)
     }
     else // Equal length, use Op1
     {
-        if (lenOp1 <= 8) { roundedLen = 8; } // Round to 8 bits
+        if (lenOp1 <= 4) { roundedLen = 4; } //round to 4 bits
+        else if (lenOp1 <= 8) { roundedLen = 8; } // Round to 8 bits
         else { roundedLen = 16; } // Round to 16 bits (keep original)
     }
 
@@ -369,13 +372,13 @@ string get_timing(bitset<16> op1, bitset<16> op2)
     //four 4x4s in parallel, multiplier takes care of it for us, no additions needed
     if (op_len == 4)
     {
-        timing = " Timing: 21 dT (4x4 multipliers) = 21dT";
+        timing = "\nTiming: 21 dT (4x4 multipliers) = 21dT";
     }
 
     //four 4x4 multipliers in parallel, two additions - one 12bit (17dt) one 16bit (21dt)
     else if (op_len == 8)
     {
-        timing = " Timing: 21 dT (4x4 multipliers) + 38 dT (CLA v.2) = 59 dT";
+        timing = "\nTiming: 21 dT (4x4 multipliers) + 38 dT (CLA v.2) = 59 dT";
     }
 
     //16 4x4s needed , can only run 4 at a time - 4*21dt,
@@ -383,7 +386,7 @@ string get_timing(bitset<16> op1, bitset<16> op2)
     // 4*21dt, 4*17dt, 4*21dt, 29dt, 37dt
     else
     {
-        timing = " Timing: 84 dT (4x4 multipliers) + 218dT (CLA v.2) = 302 dT";
+        timing = "\nTiming: 84 dT (4x4 multipliers) + 218dT (CLA v.2) = 302 dT";
     }
 
 
