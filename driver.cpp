@@ -26,6 +26,7 @@ using namespace std::this_thread;     // sleep_for, sleep_until
 using namespace std::chrono_literals; // ns, us, ms, s, h, etc.
 using std::chrono::system_clock;
 
+
 // Get inputs, hand information to simulator
 int main()
 {
@@ -34,6 +35,8 @@ int main()
     vector<bitset<16>> operand2s;
     string operand1;
     string operand2;
+    static uint8_t num_multipliers = 0;
+    static uint8_t num_additions = 0;
 
     int operand1_count = 0;
     int operand2_count = 0;
@@ -90,25 +93,60 @@ int main()
     cout << "\n| Op1 (Hex) | Op2 (Hex)| Answer | #Execution Time dt |";
     cout << "\n---------------------------------------------------------------------------";
 
+    uint8_t op_length;
+    
+    
     // Iterate through all problems
     for (int i = 0; i < operand1_count; i++)
     {
-        simulate_IM(operand1s[i], operand2s[i]); // Begin simulation
+        
+        op_length = getRoundedLength(getLength(operand1s[i]), getLength(operand2s[i]));
+               
+
+        //*Note:
+        // number of multiplications and additions are added within starting at 4x4 for x's and 8x8 for +'s
+        // since simulation always runs 16x16, we have to pick out the 
+        // rounded length of the operands to then decide how many x's and +'s
+        // are actually there, otherwise it will always be 16 multiplications and 10 additions,
+        // even for 4x4 and 8x8
+         
+
+        simulate_IM(operand1s[i], operand2s[i], num_multipliers, num_additions); // Begin simulation
+
+        //truncate additions and multiplications for 4bit and 8bit operands, otherwise
+        //leave for 16bit
+        if (op_length == 4) 
+        { 
+            num_multipliers = 1; 
+            num_additions = 0; 
+        }
+
+        else if (op_length == 8) 
+        { 
+            num_multipliers = 4;
+            num_additions = 2;
+        }
+        //calculate and display the timings
+        cout << dec << "\t\t " << calculate_timing(num_multipliers, num_additions);
+        
+        //reset for next set of operands
+        num_multipliers = 0;
+        num_additions = 0;
+
     }
 
     cout << "\n==================================================================+========\n";
 }
 
 // Main function for simulating iterative method
-void simulate_IM(bitset<16> op1, bitset<16> op2)
+void simulate_IM(bitset<16> op1, bitset<16> op2, uint8_t & num_multiplications, uint8_t & num_additions)
 {
     //cout << "\n" << dec << op1.to_ulong() << " x " << op2.to_ulong() << " = " << hex << (op1.to_ullong() * op2.to_ulong()); // Answers in Hexadecimal (debug)
     
     // Output operand1 and operand2 onto the output table
-    cout << "\n  " << uppercase << hex << op1.to_ulong() << "\t" << op2.to_ulong();
+    cout << "\n  " << uppercase << hex << op1.to_ulong() << "\t\t"<<op2.to_ulong();
 
-    string timing_display = get_timing(op1, op2);
-    
+       
     // Operations should be rounded to 1 of 2 categories --> 8x8, or 16x16 depending on which ever operand is larger
     // at minimum must use 4x4 multiplier --> so round to either 8x8 or 16x16
     // This is used later for calculating correct timing but all operations will be 16x16
@@ -126,10 +164,10 @@ void simulate_IM(bitset<16> op1, bitset<16> op2)
     bitset<8> d = getRight8bits(op2);
 
     // Calculate "bc", "ac", "bd", "ad" terms using 8x8 iterative method --> 4x4 multipliers
-    bitset<16> bc = simulateIM_8x8(b, c);
-    bitset<16> ac = simulateIM_8x8(a, c);
-    bitset<16> bd = simulateIM_8x8(b, d);
-    bitset<16> ad = simulateIM_8x8(a, d);
+    bitset<16> bc = simulateIM_8x8(b, c, num_multiplications, num_additions);
+    bitset<16> ac = simulateIM_8x8(a, c, num_multiplications, num_additions);
+    bitset<16> bd = simulateIM_8x8(b, d, num_multiplications, num_additions);
+    bitset<16> ad = simulateIM_8x8(a, d, num_multiplications, num_additions);
 
     // Concatinate "ac" and "bd"
     bitset<32> acbd = concat32_ac_bd(ac, bd);
@@ -143,9 +181,12 @@ void simulate_IM(bitset<16> op1, bitset<16> op2)
     // Final addition for answer
     bitset<32> answer = acbd.to_ulong() + pad_bc_ad.to_ulong();
 
+    //keeping track for timing calculations. for the 24 and 32bit additions of acdb and bc + ad
+    num_additions += 2;
+
 
     // Output answer to table in hex
-    cout << "\t" << hex << answer.to_ulong();
+    cout << "\t " << hex << answer.to_ulong();
     //cout << "\n16x16 Answer: " << hex << answer.to_ulong() << timing_display <<"\n\n";
     // Need to display #additions and #multiplications --> iterative method --> 4 multiplications of n/2 bit numbers and 2 additions 9 (notes)
 
@@ -157,7 +198,7 @@ void simulate_IM(bitset<16> op1, bitset<16> op2)
 }
 
 // Simulate 8x8 iterative method used with 16x16 version
-bitset<16> simulateIM_8x8(bitset<8> op1, bitset<8> op2)
+bitset<16> simulateIM_8x8(bitset<8> op1, bitset<8> op2, uint8_t & num_multiplications, uint8_t & num_additions)
 {
     // To calculate "bc", "ac", "bd", "ad" need to seperate "a", "b", "c", "d" terms
     bitset<4> a = getLeft4bits(op1);
@@ -166,11 +207,12 @@ bitset<16> simulateIM_8x8(bitset<8> op1, bitset<8> op2)
     bitset<4> d = getRight4bits(op2);
 
     // Calculate "bc", "ac", "bd", "ad" terms using 4x4 multipliers
-    bitset<8> bc = multiplier4x4(b, c);
-    bitset<8> ac = multiplier4x4(a, c);
-    bitset<8> bd = multiplier4x4(b, d);
-    bitset<8> ad = multiplier4x4(a, d);
-    
+    bitset<8> bc = multiplier4x4(b, c, num_multiplications);
+    bitset<8> ac = multiplier4x4(a, c, num_multiplications);
+    bitset<8> bd = multiplier4x4(b, d, num_multiplications);
+    bitset<8> ad = multiplier4x4(a, d, num_multiplications);
+
+      
     // Concatinate "ac" and "bd"
     bitset<16> acbd = concat16_ac_bd(ac, bd);
 
@@ -182,6 +224,9 @@ bitset<16> simulateIM_8x8(bitset<8> op1, bitset<8> op2)
 
     // Final addition for answer
     bitset<16> answer = acbd.to_ulong() + pad_bc_ad.to_ulong();
+
+    //keeping track for timing calculations. for the 12 and 16bit additions of acdb and bc + ad
+    num_additions += 2;
 
     #pragma region Debugging
     //cout << "\n\nop1: " << op1;
@@ -222,11 +267,6 @@ int getLength(bitset<16> op)
 // Return length rounded to nearest 8 or 16 bit
 int getRoundedLength(int lenOp1, int lenOp2)
 {
-    //do we need a case for 4 bits?
-    //this will always work for calculations but
-    //in the timing displays will never allow for the 
-    //4-bit case
-
     int roundedLen = 0;
 
     //Determine if 4 or 8 or 16 bit
@@ -302,9 +342,14 @@ bitset<4> getRight4bits(bitset<8> op)
 }
 
 // Simulate 4x4 mulitplier
-bitset<8> multiplier4x4(bitset<4> op1, bitset<4> op2)
+bitset<8> multiplier4x4(bitset<4> op1, bitset<4> op2, uint8_t & num_multiplications)
 {
     bitset<8> ans = op1.to_ulong() * op2.to_ulong();
+
+    //a 4x4 is used
+
+    num_multiplications++;
+
 
     return ans;
 }
@@ -371,34 +416,15 @@ bitset<32> pad_32bit(bitset<16> bc_ad)
     return ans;
 }
 
-//displays required cost of 4x4 multipliers and the cost for the 
-//subsequent additions 
-string get_timing(bitset<16> op1, bitset<16> op2)
+//finds and outputs the timing in delta T based off of the number of 
+//4x4s used
+int calculate_timing(uint8_t multiplications, uint8_t additions)
 {
-    string timing;
+    
+    int deltaT;
 
-    //get the rounded length of both operands
-    uint8_t op_len = getRoundedLength(getLength(op1), getLength(op2));
-
-    //four 4x4s in parallel, multiplier takes care of it for us, no additions needed
-    if (op_len == 4)
-    {
-        timing = "\nTiming: 21 dT (4x4 multipliers) = 21dT";
-    }
-
-    //four 4x4 multipliers in parallel, two additions - one 12bit (17dt) one 16bit (21dt)
-    else if (op_len == 8)
-    {
-        timing = "\nTiming: 21 dT (4x4 multipliers) + 38 dT (CLA v.2) = 59 dT";
-    }
-
-    //16 4x4s needed , can only run 4 at a time - 4*21dt,
-    //4 12bit additions, 4 16bit additions, 1 24bit addition, 1 16bit addition
-    // 4*21dt, 4*17dt, 4*21dt, 29dt, 37dt
-    else
-    {
-        timing = "\nTiming: 84 dT (4x4 multipliers) + 218dT (CLA v.2) = 302 dT";
-    }
-
-    return timing;
+    //delta T responsible from 4x4s -> run up to 4 in parallel ->21 dT each 
+    deltaT = (21 * ((multiplications - 4) / 4) + 21) + additions;    
+    
+    return deltaT;
 }
