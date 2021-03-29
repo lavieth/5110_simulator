@@ -25,4 +25,4 @@ bitset<32> concat32_ac_bd(bitset<16> ac, bitset<16> bd); // Concatinate "ac" and
 
 bitset<16> pad_16bit(bitset<8> bc_ad); // Shift left bc_ad to center it before final addition for 8x8 IM
 bitset<32> pad_32bit(bitset<16> bc_ad); // Shift left bc_ad to center it before final addition for 16x16 IM
-int calculate_timing(uint8_t multiplications, uint8_t additions);//displays required cost of 4x4 multipliers and the cost for the subsequent additions 
+int calculate_timing(const uint8_t multiplications, const uint8_t additions);//displays required cost of 4x4 multipliers and the cost for the subsequent additions 

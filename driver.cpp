@@ -228,6 +228,7 @@ bitset<16> simulateIM_8x8(bitset<8> op1, bitset<8> op2, uint8_t & num_multiplica
     //keeping track for timing calculations. for the 12 and 16bit additions of acdb and bc + ad
     num_additions += 2;
 
+ 
     #pragma region Debugging
     //cout << "\n\nop1: " << op1;
     //cout << "\nop2: " << op2;
@@ -418,13 +419,41 @@ bitset<32> pad_32bit(bitset<16> bc_ad)
 
 //finds and outputs the timing in delta T based off of the number of 
 //4x4s used
-int calculate_timing(uint8_t multiplications, uint8_t additions)
+int calculate_timing(const uint8_t multiplications, const uint8_t additions)
 {
-    
+
     int deltaT;
 
+    //*Note:
     //delta T responsible from 4x4s -> run up to 4 in parallel ->21 dT each 
-    deltaT = (21 * ((multiplications - 4) / 4) + 21) + additions;    
-    
+    //16x16 will always have 10 additions
+    //8x8 will always have 2 10 additions
+    //thus we can branch based off of the number of additions
+
+    //4x4 case, additions = 0 since 4x4 gives us the full answer
+    if (additions == 0)
+    {
+ 
+        deltaT = (21 * ((multiplications - 4) / 4) + 21);
+
+    }
+
+    //8x8 case
+    // we have a 12bit addition and a 16bit addition
+    // with CLA v.2 -> 17dT for the sum of 12bit, and 21dT for the sum of the 16bit 
+    else if (additions == 2)
+    {
+        deltaT = (21 * ((multiplications - 4) / 4) + 21) + 38; 
+    }
+    // 16x16case
+    // we have 4 8x8 additions = 4*38 (4 12bit and 4 16bit)
+    // then one 24 bit addition and a 32 bit addition 29dt for the sum of 24 bit and 37 dT for the 32bit addition
+    // 10 additions
+    else
+    {
+        deltaT = (21 * ((multiplications - 4) / 4) + 21) + (4*38) + 66;
+    }
+
+   
     return deltaT;
 }
