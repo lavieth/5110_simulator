@@ -126,8 +126,11 @@ int main()
             num_multipliers = 4;
             num_additions = 2;
         }
-        //calculate and display the timings
-        cout << dec << "\t\t " << calculate_timing(num_multipliers, num_additions);
+        //calculate and display the timings, branching is for output formatting only
+        if (i <= 9){ cout << dec << "\t\t " << calculate_timing(num_multipliers, num_additions); }
+        
+        else { cout << dec << "\t " << calculate_timing(num_multipliers, num_additions); }
+        
         
         //reset for next set of operands
         num_multipliers = 0;
