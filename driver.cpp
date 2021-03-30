@@ -40,6 +40,7 @@ int main()
 
     int operand1_count = 0;
     int operand2_count = 0;
+    uint8_t op_length;
 
     cout << "--- Iterative Method Multiplication Simulator ---";
 
@@ -89,27 +90,14 @@ int main()
     #pragma endregion
 
     // Table formating
-    cout << "\n============================ Iterative Method ===========================";
+    cout << "\n=================== Iterative Method =================";
     cout << "\n| Op1 (Hex) | Op2 (Hex)| Answer | #Execution Time dt |";
-    cout << "\n---------------------------------------------------------------------------";
-
-    uint8_t op_length;
-    
+    cout << "\n------------------------------------------------------";
     
     // Iterate through all problems
     for (int i = 0; i < operand1_count; i++)
     {
-        
-        op_length = getRoundedLength(getLength(operand1s[i]), getLength(operand2s[i]));
-               
-
-        //*Note:
-        // number of multiplications and additions are added within starting at 4x4 for x's and 8x8 for +'s
-        // since simulation always runs 16x16, we have to pick out the 
-        // rounded length of the operands to then decide how many x's and +'s
-        // are actually there, otherwise it will always be 16 multiplications and 10 additions,
-        // even for 4x4 and 8x8
-         
+        op_length = getRoundedLength(getLength(operand1s[i]), getLength(operand2s[i])); // Get operator length rounded to the nearest 8 or 16 bits
 
         simulate_IM(operand1s[i], operand2s[i], num_multipliers, num_additions); // Begin simulation
 
@@ -120,25 +108,32 @@ int main()
             num_multipliers = 1; 
             num_additions = 0; 
         }
-
         else if (op_length == 8) 
         { 
             num_multipliers = 4;
             num_additions = 2;
         }
+
         //calculate and display the timings, branching is for output formatting only
         if (i <= 9){ cout << dec << "\t\t " << calculate_timing(num_multipliers, num_additions); }
         
         else { cout << dec << "\t " << calculate_timing(num_multipliers, num_additions); }
         
-        
         //reset for next set of operands
         num_multipliers = 0;
         num_additions = 0;
 
+
+
+        //*Notes*
+        // number of multiplications and additions are added within starting at 4x4 for x's and 8x8 for +'s
+        // since simulation always runs 16x16, we have to pick out the 
+        // rounded length of the operands to then decide how many x's and +'s
+        // are actually there, otherwise it will always be 16 multiplications and 10 additions,
+        // even for 4x4 and 8x8
     }
 
-    cout << "\n==================================================================+========\n";
+    cout << "\n======================================================\n"; // End table formatting
 }
 
 // Main function for simulating iterative method
@@ -152,11 +147,6 @@ void simulate_IM(bitset<16> op1, bitset<16> op2, uint8_t & num_multiplications, 
        
     // Operations should be rounded to 1 of 2 categories --> 8x8, or 16x16 depending on which ever operand is larger
     // at minimum must use 4x4 multiplier --> so round to either 8x8 or 16x16
-    // This is used later for calculating correct timing but all operations will be 16x16
-
-    int roundedLen = getRoundedLength(getLength(op1), getLength(op2));
-    //cout << "\nRounded length: " << roundedLen;
-
 
     // Step 1.) Determine bc , ac , bd, ad (8x8 multiplication --> sub-iterative methods)
 
@@ -215,7 +205,6 @@ bitset<16> simulateIM_8x8(bitset<8> op1, bitset<8> op2, uint8_t & num_multiplica
     bitset<8> bd = multiplier4x4(b, d, num_multiplications);
     bitset<8> ad = multiplier4x4(a, d, num_multiplications);
 
-      
     // Concatinate "ac" and "bd"
     bitset<16> acbd = concat16_ac_bd(ac, bd);
 
@@ -231,7 +220,6 @@ bitset<16> simulateIM_8x8(bitset<8> op1, bitset<8> op2, uint8_t & num_multiplica
     //keeping track for timing calculations. for the 12 and 16bit additions of acdb and bc + ad
     num_additions += 2;
 
- 
     #pragma region Debugging
     //cout << "\n\nop1: " << op1;
     //cout << "\nop2: " << op2;
@@ -351,9 +339,7 @@ bitset<8> multiplier4x4(bitset<4> op1, bitset<4> op2, uint8_t & num_multiplicati
     bitset<8> ans = op1.to_ulong() * op2.to_ulong();
 
     //a 4x4 is used
-
     num_multiplications++;
-
 
     return ans;
 }
@@ -420,14 +406,12 @@ bitset<32> pad_32bit(bitset<16> bc_ad)
     return ans;
 }
 
-//finds and outputs the timing in delta T based off of the number of 
-//4x4s used
+//finds and outputs the timing in delta T based off of the number of 4x4 multiplication units used
 int calculate_timing(const uint8_t multiplications, const uint8_t additions)
 {
-
     int deltaT;
 
-    //*Note:
+    //*Notes*
     //delta T responsible from 4x4s -> run up to 4 in parallel ->21 dT each 
     //16x16 will always have 10 additions
     //8x8 will always have 2 10 additions
@@ -436,9 +420,7 @@ int calculate_timing(const uint8_t multiplications, const uint8_t additions)
     //4x4 case, additions = 0 since 4x4 gives us the full answer
     if (additions == 0)
     {
- 
         deltaT = (21 * ((multiplications - 4) / 4) + 21);
-
     }
 
     //8x8 case
@@ -457,6 +439,5 @@ int calculate_timing(const uint8_t multiplications, const uint8_t additions)
         deltaT = (21 * ((multiplications - 4) / 4) + 21) + (4*38) + 66;
     }
 
-   
     return deltaT;
 }
