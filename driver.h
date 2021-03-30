@@ -12,6 +12,8 @@ bitset<16> simulateIM_8x8(bitset<8> op1, bitset<8> op2, uint8_t & num_multiplica
 
 int getLength(bitset<16> op); // Get length of operand
 int getRoundedLength(int lenOp1, int lenOp2); // Get rounded lengths of operator either 8 or 16
+string op_binary_out(bitset<16> op); // Return original binary input
+string dec_to_binary(long op); // Convert any decimal number to binary
 
 bitset<8> getLeft8bits(bitset<16> op); // Get the high order 8 bits from a 16 bit operand
 bitset<8> getRight8bits(bitset<16> op); // Get the low order 8 bits from a 16 bit operand

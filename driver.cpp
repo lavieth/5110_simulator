@@ -90,9 +90,11 @@ int main()
     #pragma endregion
 
     // Table formating
-    cout << "\n=================== Iterative Method =================";
-    cout << "\n| Op1 (Hex) | Op2 (Hex)| Answer | #Execution Time dt |";
-    cout << "\n------------------------------------------------------";
+    cout << "\n============================================================================================";
+    cout << "\n=                                    Iterative Method                                      =";
+    cout << "\n============================================================================================";
+    cout << "\n|        Op1        |       Op2       |            Answer             | #Execution Time dt |";
+    cout << "\n--------------------------------------------------------------------------------------------";
     
     // Iterate through all problems
     for (int i = 0; i < operand1_count; i++)
@@ -114,11 +116,10 @@ int main()
             num_additions = 2;
         }
 
-        //calculate and display the timings, branching is for output formatting only
-        if (i <= 9){ cout << dec << "\t\t " << calculate_timing(num_multipliers, num_additions); }
-        
-        else { cout << dec << "\t " << calculate_timing(num_multipliers, num_additions); }
-        
+        //calculate and display the timings
+        cout << dec << setw(5) << left << "\t\t\t\t" << calculate_timing(num_multipliers, num_additions);
+        cout << "\n"; // spacing for next operands in table
+
         //reset for next set of operands
         num_multipliers = 0;
         num_additions = 0;
@@ -133,17 +134,13 @@ int main()
         // even for 4x4 and 8x8
     }
 
-    cout << "\n======================================================\n"; // End table formatting
+    cout << "\n============================================================================================"; // End table formatting
 }
 
 // Main function for simulating iterative method
 void simulate_IM(bitset<16> op1, bitset<16> op2, uint8_t & num_multiplications, uint8_t & num_additions)
 {
     //cout << "\n" << dec << op1.to_ulong() << " x " << op2.to_ulong() << " = " << hex << (op1.to_ullong() * op2.to_ulong()); // Answers in Hexadecimal (debug)
-    
-    // Output operand1 and operand2 onto the output table
-    cout << "\n  " << uppercase << hex << op1.to_ulong() << "\t\t"<<op2.to_ulong();
-
        
     // Operations should be rounded to 1 of 2 categories --> 8x8, or 16x16 depending on which ever operand is larger
     // at minimum must use 4x4 multiplier --> so round to either 8x8 or 16x16
@@ -178,10 +175,9 @@ void simulate_IM(bitset<16> op1, bitset<16> op2, uint8_t & num_multiplications, 
     num_additions += 2;
 
 
-    // Output answer to table in hex
-    cout << "\t " << hex << answer.to_ulong();
-    //cout << "\n16x16 Answer: " << hex << answer.to_ulong() << timing_display <<"\n\n";
-    // Need to display #additions and #multiplications --> iterative method --> 4 multiplications of n/2 bit numbers and 2 additions 9 (notes)
+    // Output operand1, operand2, and answer onto the output table
+    cout << "\n " << "0b" << uppercase << setw(18) << left << op_binary_out(op1) << setw(18) << "0b" + op_binary_out(op2) << "   0b" << setw(34) << dec_to_binary(answer.to_ulong()); // binary
+    cout << "\n " << "0x" << uppercase << setw(18) << left <<hex << op1.to_ulong() << "0x" << setw(18) << op2.to_ulong() << " 0x" << setw(10) << answer.to_ulong(); // hexadecimal
 
     
     // Notes:
@@ -440,4 +436,36 @@ int calculate_timing(const uint8_t multiplications, const uint8_t additions)
     }
 
     return deltaT;
+}
+
+// Return original binary input
+string op_binary_out(bitset<16> op) // Return original binary input
+{
+    string binary;
+
+    for (int i = getLength(op)-1; i >= 0; i--)
+    {
+        if (op[i] == true)
+        {
+            binary += '1';
+        }
+        else
+        {
+            binary += '0';
+        }
+    }
+
+    return binary;
+}
+
+// Convert any decimal number to binary
+string dec_to_binary(long op)
+{
+    string s = bitset<32>(op).to_string();
+
+    //Finding the first leading 1, strip off 0s
+    const auto loc1 = s.find('1');
+
+    if (loc1 != string::npos)
+        return s.substr(loc1);
 }
