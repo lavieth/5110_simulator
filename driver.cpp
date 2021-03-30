@@ -4,7 +4,7 @@
 // Desc: Iterative Method Multiplication Simulator                                   //
 // Class: CpE 5110                                                                   //
 // Instructor: Dr. Ali Hurson                                                        //
-// Date: 3/15/2021                   SP21                                            //
+// Date: 3/29/2021                   SP21                                            //
 // Piotr Pogorzelski, Levi Vieth                                                     //
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -90,18 +90,18 @@ int main()
     #pragma endregion
 
     // Table formating
-    cout << "\n============================================================================================";
-    cout << "\n=                                    Iterative Method                                      =";
-    cout << "\n============================================================================================";
-    cout << "\n|        Op1        |       Op2       |            Answer             | #Execution Time dt |";
-    cout << "\n--------------------------------------------------------------------------------------------";
+    cout << "\n==============================================================================================";
+    cout << "\n|                                    Iterative Method                                        |";
+    cout << "\n==============================================================================================";
+    cout << "\n|        Op1        |       Op2       |            Answer             | #Execution Time (dt) |";
+    cout << "\n----------------------------------------------------------------------------------------------";
     
     // Iterate through all problems
     for (int i = 0; i < operand1_count; i++)
     {
-        op_length = getRoundedLength(getLength(operand1s[i]), getLength(operand2s[i])); // Get operator length rounded to the nearest 8 or 16 bits
-
         simulate_IM(operand1s[i], operand2s[i], num_multipliers, num_additions); // Begin simulation
+
+        op_length = getRoundedLength(getLength(operand1s[i]), getLength(operand2s[i])); // Get operator length rounded to the nearest 8 or 16 bits
 
         //truncate additions and multiplications for 4bit and 8bit operands, otherwise
         //leave for 16bit
@@ -134,7 +134,7 @@ int main()
         // even for 4x4 and 8x8
     }
 
-    cout << "\n============================================================================================"; // End table formatting
+    cout << "\n=============================================================================================="; // End table formatting
 }
 
 // Main function for simulating iterative method
